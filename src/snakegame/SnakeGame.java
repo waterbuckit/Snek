@@ -21,7 +21,7 @@ import javax.swing.JPanel;
 
 /**
  *
- * @author Adam
+ * @author Waterbucket
  */
 public class SnakeGame {
 
@@ -81,11 +81,11 @@ public class SnakeGame {
             while (true) {
                 try {
                     TimeUnit.SECONDS.sleep(1);
+                    moveSnake();
+                    this.repaint();
                 } catch (InterruptedException ex) {
                     Logger.getLogger(SnakeGame.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                moveSnake();
-                this.repaint();
             }
         }
 

@@ -36,6 +36,7 @@ public class SnakeGame {
         this.frame.setResizable(false);
         this.frame.setVisible(true);
         this.frame.add(new Game());
+        this.frame.isFocused();
     }
 
     public static void main(String[] args) {
@@ -66,10 +67,10 @@ public class SnakeGame {
             this.snakeMoveX = 0;
             this.snakeMoveY = 0;
             this.rand = new Random();
+            
             /*
-             50x50 size 2D array because we scale everything by 10 in the graphics
-             context, meaning that our array should be 50x50 while the window
-             is 500x500. 
+             50x50 size 2D array because we scale everything by 10 i
+            window is 500x500. 
              */
             this.gameSpace = new Location[50][50];
             this.setUpGameSpace();
@@ -188,55 +189,6 @@ public class SnakeGame {
             this.gameSpace[(int) point.getX()][(int) point.getY()].setSeg(new SnakeSegment());
         }
 
-        public class KeyEventHandler implements KeyListener {
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-                int keyCode = e.getKeyCode();
-                switch (keyCode) {
-                    case KeyEvent.VK_UP:
-                        snakeMoveX = 0;
-                        if (snakeMoveY == -1) {
-                            break;
-                        }
-                        snakeMoveY = -1;
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        snakeMoveX = 0;
-                        if (snakeMoveY == 1) {
-                            break;
-                        }
-                        snakeMoveY = 1;
-                        break;
-                    case KeyEvent.VK_LEFT:
-                        snakeMoveY = 0;
-                        if (snakeMoveX == -1) {
-                            break;
-                        }
-                        snakeMoveX = -1;
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        snakeMoveY = 0;
-                        if (snakeMoveX == 1) {
-                            break;
-                        }
-                        snakeMoveY = 1;
-                        break;
-                }
-            }
-
-            @Override
-            public void keyTyped(KeyEvent e) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        }
-
         /**
          * Location class will store either a segment or a fruit.
          */
@@ -288,6 +240,54 @@ public class SnakeGame {
         private class Fruit {
 
             public Fruit() {
+            }
+        }
+        public class KeyEventHandler implements KeyListener {
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                int keyCode = e.getKeyCode();
+                switch (keyCode) {
+                    case KeyEvent.VK_UP:
+                        snakeMoveX = 0;
+                        if (snakeMoveY == -1) {
+                            break;
+                        }
+                        snakeMoveY = -1;
+                        break;
+                    case KeyEvent.VK_DOWN:
+                        snakeMoveX = 0;
+                        if (snakeMoveY == 1) {
+                            break;
+                        }
+                        snakeMoveY = 1;
+                        break;
+                    case KeyEvent.VK_LEFT:
+                        snakeMoveY = 0;
+                        if (snakeMoveX == -1) {
+                            break;
+                        }
+                        snakeMoveX = -1;
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                        snakeMoveY = 0;
+                        if (snakeMoveX == 1) {
+                            break;
+                        }
+                        snakeMoveY = 1;
+                        break;
+                }
+            }
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         }
     }

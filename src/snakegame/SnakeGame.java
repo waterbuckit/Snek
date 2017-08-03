@@ -268,14 +268,13 @@ public class SnakeGame {
              * @param y
              */
             public void draw(Graphics2D g2d, int x, int y) {
-                if (seg == null && fruit != null) {
+                if (fruit != null) {
                     g2d.setColor(Color.red);
                     g2d.drawRect(x, y, 1, 1);
                 } else if (seg != null) {
                     g2d.setColor(Color.green);
                     g2d.drawRect(x, y, 1, 1);
                 }
-
             }
         }
 

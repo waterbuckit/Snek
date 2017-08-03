@@ -160,7 +160,6 @@ public class SnakeGame {
                 this.snakeHead.setLocation(0, newHeadPositionY);
                 this.setSegment(this.snakeHead);
             } else if (newHeadPositionY < 0) {
-                this.setSegment(this.snakeHead);
                 this.snakeHead.setLocation(newHeadPositionX, this.gameSpace.length - 1);
                 this.setSegment(this.snakeHead);
             } else if (newHeadPositionY == this.gameSpace.length) {

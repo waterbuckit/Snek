@@ -13,6 +13,9 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -76,6 +79,11 @@ public class SnakeGame {
              game loop, on each iteration, handle the movement of the snake
              */
             while (true) {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(SnakeGame.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 moveSnake();
                 this.repaint();
             }

@@ -13,10 +13,8 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
@@ -51,25 +49,49 @@ public class SnakeGame {
 
     private class SnakeSegment {
 
-        public SnakeSegment() {
+        private int x;
+        private int y;
+        
+        public SnakeSegment(int x, int y) {
+            this.x = x;
+            this.y = y;
         }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public void setX(int x) {
+            this.x = x;
+        }
+
+        public void setY(int y) {
+            this.y = y;
+        }
+        
     }
 
     private class Game extends JPanel {
 
         private Location[][] gameSpace;
+        private ArrayList<SnakeSegment> trail;
         private Random rand;
         // add these variables to the head to work out the position of the next movement
         private int snakeMoveX;
         private int snakeMoveY;
         // keeps track of the Snake's head and tail
-        private Point snakeHead;
-        private Point snakeTail;
+        private int snakeHeadPointer;
+        private int snakeTailPointer;
 
         public Game() {
             this.setBackground(Color.white);
-            this.snakeHead = new Point();
-            this.snakeTail = new Point();
+            this.trail = new ArrayList<>();
+            this.snakeHeadPointer = 0;
+            this.snakeTailPointer = 0;
             this.snakeMoveX = 0;
             this.snakeMoveY = 0;
             this.rand = new Random();
@@ -83,41 +105,18 @@ public class SnakeGame {
             this.placeFirstSegment();
             this.placeFruit();
             this.setVisible(true);
-//            this.startGame();
-            /*
-             game loop, on each iteration, handle the movement of the snake
-             */
-//            while (true) {
-//                try {
-//                    TimeUnit.SECONDS.sleep(1);
-//                    moveSnake();
-//                    System.out.println("Hello");
-//                } catch (InterruptedException ex) {
-//                    Logger.getLogger(SnakeGame.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            }
+            this.startGame();
         }
 
-        public void startGame(int n) {
+        private void startGame() {
 
             int timeDelay = 1000; // msecs delay
             new Timer(timeDelay, (ActionEvent arg0) -> {
                 this.moveSnake();
+                this.revalidate();
             }).start();
-
         }
 
-//        
-//        private void startGame(){
-//            while (true) {
-//                try {
-//                    TimeUnit.SECONDS.sleep(1);
-//                    moveSnake();
-//                } catch (InterruptedException ex) {
-//                    Logger.getLogger(SnakeGame.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            }
-//        }
         public void addKeyBinding(JComponent component, int keyCode, String id, ActionListener action) {
             InputMap im = component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
             ActionMap am = component.getActionMap();
@@ -161,9 +160,8 @@ public class SnakeGame {
          * Places the first segment at the centre of the gameSpace array.
          */
         private void placeFirstSegment() {
-            this.snakeHead.setLocation(25, 25);
-            this.snakeTail.setLocation(25, 25);
-            this.gameSpace[25][25].setSeg(new SnakeSegment());
+            this.trail.add(new SnakeSegment(25,25));
+            this.gameSpace[25][25].setSeg(new SnakeSegment(25, 25));
         }
 
         /**
@@ -171,67 +169,46 @@ public class SnakeGame {
          * to the head based on the result of vector addition on snakeHead and
          * snakeMove
          *
-         * Realised the this logic is totally wrong because you can't work out 
-         * the next position of the tail. In essence, it is impossible to move 
+         * Realised the this logic is totally wrong because you can't work out
+         * the next position of the tail. In essence, it is impossible to move
          * like this.
-         * 
+         *  
+         * Instead we can have a pointer which will point to the next segment to 
+         * move, so when the tail moves to the new position, it becomes head 
+         * and the original tail - 1 = new tail!
          */
         private void moveSnake() {
-            this.gameSpace[(int) this.snakeTail.getX()][(int) this.snakeTail.getY()].setSeg(null);
-            this.snakeHead.setLocation(this.snakeHead.getX() + snakeMoveX, this.snakeHead.getY() + this.snakeMoveY);
-            this.gameSpace[(int) this.snakeHead.getX()][(int) this.snakeHead.getY()].setSeg(new SnakeSegment());
-            // if the next move would go off screen
-            
-            // if the segment has a fruit on it
-            if (this.gameSpace[(int) this.snakeHead.getX()][(int) this.snakeHead.getY()].getFruit() != null) {
-                this.gameSpace[(int) this.snakeHead.getX()][(int) this.snakeHead.getY()].setFruit(null);
-                this.placeNewSegment();
-                this.placeFruit();
+            int newHeadPosX = trail.get(snakeHeadPointer).getX() + snakeMoveX;
+            int newHeadPosY = trail.get(snakeHeadPointer).getY() + snakeMoveY;
+            System.out.println("X: " + newHeadPosX + " Y: " + newHeadPosY);
+            if(newHeadPosX < 0){
+                newHeadPosX = this.gameSpace.length - 1;
+            }else if(newHeadPosX == this.gameSpace.length){
+                newHeadPosX = 0;
+            }else if(newHeadPosY < 0){
+                newHeadPosY = this.gameSpace.length - 1;
+            }else if(newHeadPosY == this.gameSpace.length){
+                newHeadPosY = 0;
             }
+//            trail.get(snakeHeadPointer).setX(newHeadPosX);
+//            trail.get(snakeHeadPointer).setY(newHeadPosY);
+            this.gameSpace[trail.get(snakeTailPointer).getX()][trail.get(snakeTailPointer).getY()].setSeg(null);
+            int tempTailPointer = snakeTailPointer;
+            if(snakeTailPointer - 1 < 0){
+                snakeTailPointer = trail.size() - 1;
+            }else{
+                snakeTailPointer--;
+            }
+            snakeHeadPointer = tempTailPointer;
+            this.gameSpace[trail.get(snakeHeadPointer).getX()][trail.get(snakeHeadPointer).getY()].setSeg(new SnakeSegment(newHeadPosX, newHeadPosY));
         }
 
-        /**
-         * creates new locations in the gameSpace
-         */
         private void setUpGameSpace() {
-            for (int y = 0; y < gameSpace.length; y++) {
-                for (int x = 0; x < gameSpace.length; x++) {
-                    gameSpace[x][y] = new Location();
+            for (int y = 0; y < this.gameSpace.length; y++) {
+                for (int x = 0; x < this.gameSpace.length; x++) {
+                    this.gameSpace[x][y] = new Location();
                 }
             }
-        }
-
-        /**
-         * absolutely disgusting method that needs work
-         */
-        private void placeNewSegment() {
-            int newHeadPositionX = (int) this.snakeHead.getX() + snakeMoveX;
-            int newHeadPositionY = (int) this.snakeHead.getY() + snakeMoveY;
-            if (newHeadPositionX < 0) {
-                this.snakeHead.setLocation(this.gameSpace.length - 1, newHeadPositionY);
-                this.setSegment(this.snakeHead);
-            } else if (newHeadPositionX == this.gameSpace.length) {
-                this.snakeHead.setLocation(0, newHeadPositionY);
-                this.setSegment(this.snakeHead);
-            } else if (newHeadPositionY < 0) {
-                this.snakeHead.setLocation(newHeadPositionX, this.gameSpace.length - 1);
-                this.setSegment(this.snakeHead);
-            } else if (newHeadPositionY == this.gameSpace.length) {
-                this.snakeHead.setLocation(0, newHeadPositionY);
-                this.setSegment(this.snakeHead);
-            } else {
-                this.snakeHead.setLocation(newHeadPositionX, newHeadPositionY);
-                this.setSegment(this.snakeHead);
-            }
-        }
-
-        /**
-         * will set a segment for a particular point.
-         *
-         * @param point
-         */
-        private void setSegment(Point point) {
-            this.gameSpace[(int) point.getX()][(int) point.getY()].setSeg(new SnakeSegment());
         }
 
         private void setKeyBindings() {
@@ -319,7 +296,39 @@ public class SnakeGame {
             public Fruit() {
             }
         }
+    }
 
+    /**
+     * creates new locations in the gameSpace
+     */
+    /**
+     * absolutely disgusting method that needs work
+     */
+//        private void placeNewSegment() {
+//            int newHeadPositionX = (int) this.snakeHead.getX() + snakeMoveX;
+//            int newHeadPositionY = (int) this.snakeHead.getY() + snakeMoveY;
+//            if (newHeadPositionX < 0) {
+//                this.snakeHead.setLocation(this.gameSpace.length - 1, newHeadPositionY);
+//                this.setSegment(this.snakeHead);
+//            } else if (newHeadPositionX == this.gameSpace.length) {
+//                this.snakeHead.setLocation(0, newHeadPositionY);
+//                this.setSegment(this.snakeHead);
+//            } else if (newHeadPositionY < 0) {
+//                this.snakeHead.setLocation(newHeadPositionX, this.gameSpace.length - 1);
+//                this.setSegment(this.snakeHead);
+//            } else if (newHeadPositionY == this.gameSpace.length) {
+//                this.snakeHead.setLocation(0, newHeadPositionY);
+//                this.setSegment(this.snakeHead);
+//            } else {
+//                this.snakeHead.setLocation(newHeadPositionX, newHeadPositionY);
+//                this.setSegment(this.snakeHead);
+//            }
+//        }
+    /**
+     * will set a segment for a particular point.
+     *
+     * @param point
+     */
 //        public class KeyEventHandler implements KeyListener {
 //
 //            @Override
@@ -369,5 +378,4 @@ public class SnakeGame {
 //                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 //            }
 //        }
-    }
 }

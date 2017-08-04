@@ -10,14 +10,21 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 /**
  *
@@ -30,13 +37,11 @@ public class SnakeGame {
     public SnakeGame() {
         this.frame = new JFrame();
         this.frame.setSize(new Dimension(500, 500));
-        this.frame.setBackground(Color.white);
         this.frame.setTitle("Snek");
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.frame.setResizable(false);
         this.frame.setVisible(true);
         this.frame.add(new Game());
-        this.frame.isFocused();
     }
 
     public static void main(String[] args) {
@@ -61,18 +66,19 @@ public class SnakeGame {
         private Point snakeTail;
 
         public Game() {
-            this.addKeyListener(new KeyEventHandler());
+            this.setBackground(Color.white);
             this.snakeHead = new Point();
             this.snakeTail = new Point();
             this.snakeMoveX = 0;
             this.snakeMoveY = 0;
             this.rand = new Random();
-            
+
             /*
              50x50 size 2D array because we scale everything by 10 i
-            window is 500x500. 
+             window is 500x500. 
              */
             this.gameSpace = new Location[50][50];
+            this.setKeyBindings();
             this.setUpGameSpace();
             this.placeFirstSegment();
             this.placeFruit();
@@ -88,6 +94,20 @@ public class SnakeGame {
                     Logger.getLogger(SnakeGame.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+        }
+
+        public void addKeyBinding(JComponent component, int keyCode, String id, ActionListener action) {
+            InputMap im = component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+            ActionMap am = component.getActionMap();
+
+            im.put(KeyStroke.getKeyStroke(keyCode, 0, false), id);
+            am.put(id, new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    action.actionPerformed(e);
+                }
+            });
         }
 
         @Override
@@ -189,6 +209,37 @@ public class SnakeGame {
             this.gameSpace[(int) point.getX()][(int) point.getY()].setSeg(new SnakeSegment());
         }
 
+        private void setKeyBindings() {
+            this.addKeyBinding(this, KeyEvent.VK_UP, "Up", (evt) -> {
+                snakeMoveX = 0;
+                if (snakeMoveY == -1) {
+                    return;
+                }
+                snakeMoveY = -1;
+            });
+            this.addKeyBinding(this, KeyEvent.VK_DOWN, "Down", (evt) -> {
+                snakeMoveX = 0;
+                if (snakeMoveY == 1) {
+                    return;
+                }
+                snakeMoveY = 1;
+            });
+            this.addKeyBinding(this, KeyEvent.VK_LEFT, "Left", (evt) -> {
+                snakeMoveY = 0;
+                if (snakeMoveX == -1) {
+                    return;
+                }
+                snakeMoveX = -1;
+            });
+            this.addKeyBinding(this, KeyEvent.VK_RIGHT, "Right", (evt) -> {
+                snakeMoveY = 0;
+                if (snakeMoveX == 1) {
+                    return;
+                }
+                snakeMoveY = 1;
+            });
+        }
+
         /**
          * Location class will store either a segment or a fruit.
          */
@@ -242,53 +293,55 @@ public class SnakeGame {
             public Fruit() {
             }
         }
-        public class KeyEventHandler implements KeyListener {
 
-            @Override
-            public void keyPressed(KeyEvent e) {
-                int keyCode = e.getKeyCode();
-                switch (keyCode) {
-                    case KeyEvent.VK_UP:
-                        snakeMoveX = 0;
-                        if (snakeMoveY == -1) {
-                            break;
-                        }
-                        snakeMoveY = -1;
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        snakeMoveX = 0;
-                        if (snakeMoveY == 1) {
-                            break;
-                        }
-                        snakeMoveY = 1;
-                        break;
-                    case KeyEvent.VK_LEFT:
-                        snakeMoveY = 0;
-                        if (snakeMoveX == -1) {
-                            break;
-                        }
-                        snakeMoveX = -1;
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        snakeMoveY = 0;
-                        if (snakeMoveX == 1) {
-                            break;
-                        }
-                        snakeMoveY = 1;
-                        break;
-                }
-            }
-
-            @Override
-            public void keyTyped(KeyEvent e) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        }
+//        public class KeyEventHandler implements KeyListener {
+//
+//            @Override
+//            public void keyPressed(KeyEvent e) {
+//                int keyCode = e.getKeyCode();
+//                switch (keyCode) {
+//                    case KeyEvent.VK_UP:
+//                        snakeMoveX = 0;
+//                        System.out.println("PRESSED");
+//                        if (snakeMoveY == -1) {
+//                            break;
+//                        }
+//                        snakeMoveY = -1;
+//                        break;
+//                    case KeyEvent.VK_DOWN:
+//                        snakeMoveX = 0;
+//                        if (snakeMoveY == 1) {
+//                            break;
+//                        }
+//                        snakeMoveY = 1;
+//                        break;
+//                    case KeyEvent.VK_LEFT:
+//                        snakeMoveY = 0;
+//                        if (snakeMoveX == -1) {
+//                            break;
+//                        }
+//                        snakeMoveX = -1;
+//                        break;
+//                    case KeyEvent.VK_RIGHT:
+//                        snakeMoveY = 0;
+//                        if (snakeMoveX == 1) {
+//                            break;
+//                        }
+//                        snakeMoveY = 1;
+//                        break;
+//                }
+//            }
+//
+//            @Override
+//            public void keyTyped(KeyEvent e) {
+//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//
+//            }
+//
+//            @Override
+//            public void keyReleased(KeyEvent e) {
+//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//            }
+//        }
     }
 }

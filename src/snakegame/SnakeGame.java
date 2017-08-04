@@ -13,7 +13,6 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -25,6 +24,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import javax.swing.Timer;
 
 /**
  *
@@ -36,12 +36,13 @@ public class SnakeGame {
 
     public SnakeGame() {
         this.frame = new JFrame();
-        this.frame.setSize(new Dimension(500, 500));
+        this.frame.setSize(new Dimension(510, 510));
         this.frame.setTitle("Snek");
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.frame.setResizable(false);
         this.frame.setVisible(true);
         this.frame.add(new Game());
+        this.frame.validate();
     }
 
     public static void main(String[] args) {
@@ -72,7 +73,6 @@ public class SnakeGame {
             this.snakeMoveX = 0;
             this.snakeMoveY = 0;
             this.rand = new Random();
-
             /*
              50x50 size 2D array because we scale everything by 10 i
              window is 500x500. 
@@ -82,20 +82,42 @@ public class SnakeGame {
             this.setUpGameSpace();
             this.placeFirstSegment();
             this.placeFruit();
+            this.setVisible(true);
+//            this.startGame();
             /*
              game loop, on each iteration, handle the movement of the snake
              */
-            while (true) {
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                    moveSnake();
-                    this.repaint();
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(SnakeGame.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
+//            while (true) {
+//                try {
+//                    TimeUnit.SECONDS.sleep(1);
+//                    moveSnake();
+//                    System.out.println("Hello");
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(SnakeGame.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
         }
 
+        public void startGame(int n) {
+
+            int timeDelay = 1000; // msecs delay
+            new Timer(timeDelay, (ActionEvent arg0) -> {
+                this.moveSnake();
+            }).start();
+
+        }
+
+//        
+//        private void startGame(){
+//            while (true) {
+//                try {
+//                    TimeUnit.SECONDS.sleep(1);
+//                    moveSnake();
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(SnakeGame.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//        }
         public void addKeyBinding(JComponent component, int keyCode, String id, ActionListener action) {
             InputMap im = component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
             ActionMap am = component.getActionMap();
@@ -111,7 +133,7 @@ public class SnakeGame {
         }
 
         @Override
-        protected void paintComponent(Graphics g) {
+        public void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g;
             g2d.scale(10, 10);
@@ -149,14 +171,17 @@ public class SnakeGame {
          * to the head based on the result of vector addition on snakeHead and
          * snakeMove
          *
-         *
+         * Realised the this logic is totally wrong because you can't work out 
+         * the next position of the tail. In essence, it is impossible to move 
+         * like this.
+         * 
          */
         private void moveSnake() {
             this.gameSpace[(int) this.snakeTail.getX()][(int) this.snakeTail.getY()].setSeg(null);
             this.snakeHead.setLocation(this.snakeHead.getX() + snakeMoveX, this.snakeHead.getY() + this.snakeMoveY);
             this.gameSpace[(int) this.snakeHead.getX()][(int) this.snakeHead.getY()].setSeg(new SnakeSegment());
             // if the next move would go off screen
-
+            
             // if the segment has a fruit on it
             if (this.gameSpace[(int) this.snakeHead.getX()][(int) this.snakeHead.getY()].getFruit() != null) {
                 this.gameSpace[(int) this.snakeHead.getX()][(int) this.snakeHead.getY()].setFruit(null);
@@ -212,31 +237,32 @@ public class SnakeGame {
         private void setKeyBindings() {
             this.addKeyBinding(this, KeyEvent.VK_UP, "Up", (evt) -> {
                 snakeMoveX = 0;
-                if (snakeMoveY == -1) {
+                if (snakeMoveY == -1 || snakeMoveY == 1) {
                     return;
                 }
                 snakeMoveY = -1;
             });
+
             this.addKeyBinding(this, KeyEvent.VK_DOWN, "Down", (evt) -> {
                 snakeMoveX = 0;
-                if (snakeMoveY == 1) {
+                if (snakeMoveY == 1 || snakeMoveY == -1) {
                     return;
                 }
                 snakeMoveY = 1;
             });
             this.addKeyBinding(this, KeyEvent.VK_LEFT, "Left", (evt) -> {
                 snakeMoveY = 0;
-                if (snakeMoveX == -1) {
+                if (snakeMoveX == -1 || snakeMoveX == 1) {
                     return;
                 }
                 snakeMoveX = -1;
             });
             this.addKeyBinding(this, KeyEvent.VK_RIGHT, "Right", (evt) -> {
                 snakeMoveY = 0;
-                if (snakeMoveX == 1) {
+                if (snakeMoveX == 1 || snakeMoveX == -1) {
                     return;
                 }
-                snakeMoveY = 1;
+                snakeMoveX = 1;
             });
         }
 

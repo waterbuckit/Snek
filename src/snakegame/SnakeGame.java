@@ -110,7 +110,7 @@ public class SnakeGame {
 
         private void startGame() {
 
-            int timeDelay = 300; // msecs delay
+            int timeDelay = 100; // msecs delay
             new Timer(timeDelay, (ActionEvent arg0) -> {
                 this.moveSnake();
                 this.repaint();
@@ -136,7 +136,7 @@ public class SnakeGame {
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g;
-            g2d.scale(10, 10);
+//            g2d.scale(10, 10);
             for (int y = 0; y < gameSpace.length; y++) {
                 for (int x = 0; x < gameSpace.length; x++) {
                     gameSpace[x][y].draw(g2d, x, y);
@@ -191,11 +191,19 @@ public class SnakeGame {
             }else if(newHeadPosY == this.gameSpace.length){
                 newHeadPosY = 0;
             }
-//            if(this.gameSpace[newHeadPosX][newHeadPosY].getFruit() != null){
-//                this.gameSpace[newHeadPosX][newHeadPosY].setFruit(null);
-//                this.trail.
-//                
-//            }
+            // check whether the next location is a fruit 
+//            
+            if(this.gameSpace[newHeadPosX][newHeadPosY].getFruit() != null){
+                this.gameSpace[newHeadPosX][newHeadPosY].setFruit(null);
+                this.placeFruit();
+//                // shift the elements to insert the new segment in front of the head pointer
+                this.trail.add(snakeHeadPointer, new SnakeSegment(newHeadPosX, newHeadPosY));
+                this.gameSpace[trail.get(snakeHeadPointer).getX()][trail.get(snakeHeadPointer).getY()].setSeg(new SnakeSegment(newHeadPosX, newHeadPosY));
+                for(int i = 0; i < trail.size(); i++){
+                    System.out.println(i + " x: " + trail.get(i).getX() + " y: " + trail.get(i).getY()) ;
+                }
+                return;
+            }
 //            trail.get(snakeHeadPointer).setX(newHeadPosX);
 //            trail.get(snakeHeadPointer).setY(newHeadPosY);
             this.gameSpace[trail.get(snakeTailPointer).getX()][trail.get(snakeTailPointer).getY()].setSeg(null);
@@ -291,10 +299,10 @@ public class SnakeGame {
             public void draw(Graphics2D g2d, int x, int y) {
                 if (fruit != null) {
                     g2d.setColor(Color.red);
-                    g2d.drawRect(x, y, 1, 1);
+                    g2d.drawRect(x*10, y*10, 1*10, 1*10);
                 } else if (seg != null) {
                     g2d.setColor(Color.green);
-                    g2d.drawRect(x, y, 1, 1);
+                    g2d.drawRect(x*10, y*10, 1*10, 1*10);
                 }
             }
         }

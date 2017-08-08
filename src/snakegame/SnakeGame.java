@@ -110,9 +110,10 @@ public class SnakeGame {
 
         private void startGame() {
 
-            int timeDelay = 1000; // msecs delay
+            int timeDelay = 300; // msecs delay
             new Timer(timeDelay, (ActionEvent arg0) -> {
                 this.moveSnake();
+                this.repaint();
                 this.revalidate();
             }).start();
         }
@@ -190,6 +191,11 @@ public class SnakeGame {
             }else if(newHeadPosY == this.gameSpace.length){
                 newHeadPosY = 0;
             }
+//            if(this.gameSpace[newHeadPosX][newHeadPosY].getFruit() != null){
+//                this.gameSpace[newHeadPosX][newHeadPosY].setFruit(null);
+//                this.trail.
+//                
+//            }
 //            trail.get(snakeHeadPointer).setX(newHeadPosX);
 //            trail.get(snakeHeadPointer).setY(newHeadPosY);
             this.gameSpace[trail.get(snakeTailPointer).getX()][trail.get(snakeTailPointer).getY()].setSeg(null);
@@ -200,6 +206,8 @@ public class SnakeGame {
                 snakeTailPointer--;
             }
             snakeHeadPointer = tempTailPointer;
+            trail.get(snakeHeadPointer).setX(newHeadPosX);
+            trail.get(snakeHeadPointer).setY(newHeadPosY);
             this.gameSpace[trail.get(snakeHeadPointer).getX()][trail.get(snakeHeadPointer).getY()].setSeg(new SnakeSegment(newHeadPosX, newHeadPosY));
         }
 

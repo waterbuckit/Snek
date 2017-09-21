@@ -1,6 +1,11 @@
 package com.akinevz.snake
 
-case class Snake(travelling: Direction, elements: List[SnakeElement] = List()) {
+case class Snake private(travelling: Direction, elements: List[SnakeElement]) {
+
+  def this(travelling:Direction,gridSize:Dimension) = {
+    this(travelling,List(SnakeElement((gridSize.x/2,gridSize.y/2))))
+  }
+
   object Head{
     def unapply(arg: Snake): Option[(Position)] = Some(arg.head.pos)
   }
@@ -19,7 +24,7 @@ case class Snake(travelling: Direction, elements: List[SnakeElement] = List()) {
     this copy (elements = updated)
   }
 
-  def body: List[SnakeElement] = elements drop 4 //dropping all above "neck"
+  def body: List[SnakeElement] = elements drop 3 //dropping all above "neck"
 
 }
 

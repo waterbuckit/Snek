@@ -4,8 +4,7 @@ import javax.swing._
 
 object SnakeGame {
 
-  lazy val game: StateManager = new StateManager()
-  lazy val frame: GameFrame = new GameFrame(game)
+  lazy val frame: GameFrame = new GameFrame()
   lazy val window: JFrame = new JFrame() {
     this setPreferredSize new java.awt.Dimension(800, 600)
     this setTitle "Snek"

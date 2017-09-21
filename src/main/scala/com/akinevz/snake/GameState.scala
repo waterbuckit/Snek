@@ -4,22 +4,22 @@ package com.akinevz.snake
 import scala.util.Random
 
 
-sealed trait GameState{
-  def update:GameState
+sealed trait GameState {
+  def update: GameState
 }
 
-object GameState{
-  def start:GameState = {
-    val player = Snake(Direction.random)
-    val state = PlayingState(player,(50,50))
+object GameState {
+  def start: GameState = {
+    val player = new Snake(Direction.random, (10, 10))
+    val state = PlayingState(player, (10,10))
     state
   }
+
 }
 
-case class PlayingState private(player: Snake, dim: Dimension) extends GameState{
+case class PlayingState private(player: Snake, dim: Dimension, fruit: Option[FruitElement]=None) extends GameState {
 
-
-  lazy val fruit:FruitElement = {
+  def spawnFruit: FruitElement = {
     val taken = player.elements.map(_.pos).toSet
     lazy val gen: Position = dim.generate match {
       case x if taken.contains(x) => gen
@@ -28,28 +28,30 @@ case class PlayingState private(player: Snake, dim: Dimension) extends GameState
     FruitElement(gen)
   }
 
-  def update: GameState = {
+  def update: GameState = if (fruit.isEmpty) PlayingState(player, dim, Some(spawnFruit)).update else {
     val next: Snake = player.move match {
       case player.Head(pos) if !(dim contains pos) =>
-        player copy (elements = (player.head move (dim wrap pos)) :: player.elements.tail)
-      case snake if snake.elements.isEmpty => snake.copy(elements = List(SnakeElement(dim.x/2,dim.y/2)))
+        player copy (elements = (player.tip move (dim wrap pos)) :: player.elements.init)
+      case snake if snake.elements.isEmpty => snake.copy(elements = List(SnakeElement(dim.x / 2, dim.y / 2)))
       case otherwise => otherwise
     }
-    val landing: Option[GridElement] = (player.body :+ fruit) find ( _.pos == next.head.pos)
+    val landing: Option[GridElement] = (player.body ++ fruit) find (_.pos == next.head.pos)
     landing match {
       case Some(FruitElement(pos)) =>
-        println(s"Ate fruit at $pos")
         val grown = player.grow
-        if(grown.elements.length == dim.totalSpaces) Win
+        if (grown.elements.length == dim.totalSpaces) Win
         else PlayingState(grown, dim)
       case Some(SnakeElement(pos)) => println(s"Collision at $pos") and Lost
       case None => this copy(next, dim)
     }
   }
 }
-sealed trait GameEnd extends GameState{
-  override def update: GameState =  this
+
+sealed trait GameEnd extends GameState {
+  override def update: GameState = this
 
 }
+
 case object Lost extends GameEnd
+
 case object Win extends GameEnd

@@ -19,6 +19,13 @@ object GameState {
 
 case class PlayingState private(player: Snake, dim: Dimension, fruit: Option[FruitElement]=None) extends GameState {
 
+  def wrapHead(snake:Snake) : Snake = snake match {
+    case player.Head(pos) if !(dim contains pos) =>
+      player copy (elements = (player.tip move (dim wrap pos)) :: player.elements.init)
+    case s if s.elements.isEmpty => snake.copy(elements = List(SnakeElement(dim.x / 2, dim.y / 2)))
+    case otherwise => otherwise
+  }
+
   def spawnFruit: FruitElement = {
     val taken = player.elements.map(_.pos).toSet
     lazy val gen: Position = dim.generate match {
@@ -29,16 +36,11 @@ case class PlayingState private(player: Snake, dim: Dimension, fruit: Option[Fru
   }
 
   def update: GameState = if (fruit.isEmpty) PlayingState(player, dim, Some(spawnFruit)).update else {
-    val next: Snake = player.move match {
-      case player.Head(pos) if !(dim contains pos) =>
-        player copy (elements = (player.tip move (dim wrap pos)) :: player.elements.init)
-      case snake if snake.elements.isEmpty => snake.copy(elements = List(SnakeElement(dim.x / 2, dim.y / 2)))
-      case otherwise => otherwise
-    }
+    val next: Snake = wrapHead(player.move)
     val landing: Option[GridElement] = (player.body ++ fruit) find (_.pos == next.head.pos)
     landing match {
       case Some(FruitElement(pos)) =>
-        val grown = player.grow
+        val grown = wrapHead(player.grow)
         if (grown.elements.length == dim.totalSpaces) Win
         else PlayingState(grown, dim)
       case Some(SnakeElement(pos)) => println(s"Collision at $pos") and Lost
